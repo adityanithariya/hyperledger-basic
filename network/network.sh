@@ -237,11 +237,15 @@ function createOrgs() {
 
     infoln "Creating Org1 Identities"
 
-    createOrg1
+    for (( PEER=0; PEER<2; PEER++ )); do
+      createOrg1 $PEER
+    done
 
     infoln "Creating Org2 Identities"
 
-    createOrg2
+    for (( PEER=0; PEER<2; PEER++ )); do
+      createOrg2 $PEER
+    done
 
     infoln "Creating Orderer Org Identities"
 

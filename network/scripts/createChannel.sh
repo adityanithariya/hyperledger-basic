@@ -73,7 +73,9 @@ createChannel() {
 joinChannel() {
   ORG=$1
   FABRIC_CFG_PATH=$PWD/../config/
-  setGlobals $ORG
+  for ((PEER=0; PEER<$2; PEER++)); do
+  # Your commands here
+  setGlobals $ORG $PEER
 	local rc=1
 	local COUNTER=1
 	## Sometimes Join takes time, hence retry
@@ -88,6 +90,8 @@ joinChannel() {
 	done
 	cat log.txt
 	verifyResult $res "After $MAX_RETRY attempts, peer0.org${ORG} has failed to join channel '$CHANNEL_NAME' "
+  done
+
 }
 
 setAnchorPeer() {
@@ -119,10 +123,12 @@ createChannel $BFT
 successln "Channel '$CHANNEL_NAME' created"
 
 ## Join all the peers to the channel
+set -x
 infoln "Joining org1 peer to the channel..."
-joinChannel 1
+joinChannel 1 2
 infoln "Joining org2 peer to the channel..."
-joinChannel 2
+joinChannel 2 2
+set +x
 
 ## Set the anchor peers for each org in the channel
 infoln "Setting anchor peer for org1..."

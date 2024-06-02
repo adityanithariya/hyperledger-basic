@@ -51,6 +51,7 @@ PeerOrgs:
       SANS:
         - localhost
         - "127.0.0.1"
+        - peer0.org2.example.com
       # Start: 5
       # Hostname: {{.Prefix}}{{.Index}} # default
     # ---------------------------------------------------------------------------
