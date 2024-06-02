@@ -2,12 +2,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 // Deterministic JSON.stringify()
-import {Context, Contract, Info, Returns, Transaction} from 'fabric-contract-api';
+import { Context, Contract, Info, Returns, Transaction } from 'fabric-contract-api';
 import stringify from 'json-stringify-deterministic';
 import sortKeysRecursive from 'sort-keys-recursive';
-import {Asset} from './asset';
+import { Asset } from './asset';
 
-@Info({title: 'AssetTransfer', description: 'Smart contract for trading assets'})
+@Info({ title: 'AssetTransfer', description: 'Smart contract for trading assets' })
 export class AssetTransferContract extends Contract {
 
     @Transaction()
@@ -64,7 +64,6 @@ export class AssetTransferContract extends Contract {
         }
     }
 
-    // CreateAsset issues a new asset to the world state with given details.
     @Transaction()
     public async CreateAsset(ctx: Context, id: string, color: string, size: number, owner: string, appraisedValue: number): Promise<void> {
         const exists = await this.AssetExists(ctx, id);
@@ -83,7 +82,6 @@ export class AssetTransferContract extends Contract {
         await ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(asset))));
     }
 
-    // ReadAsset returns the asset stored in the world state with given id.
     @Transaction(false)
     public async ReadAsset(ctx: Context, id: string): Promise<string> {
         const assetJSON = await ctx.stub.getState(id); // get the asset from chaincode state
@@ -93,7 +91,6 @@ export class AssetTransferContract extends Contract {
         return assetJSON.toString();
     }
 
-    // UpdateAsset updates an existing asset in the world state with provided parameters.
     @Transaction()
     public async UpdateAsset(ctx: Context, id: string, color: string, size: number, owner: string, appraisedValue: number): Promise<void> {
         const exists = await this.AssetExists(ctx, id);
@@ -113,7 +110,6 @@ export class AssetTransferContract extends Contract {
         return ctx.stub.putState(id, Buffer.from(stringify(sortKeysRecursive(updatedAsset))));
     }
 
-    // DeleteAsset deletes an given asset from the world state.
     @Transaction()
     public async DeleteAsset(ctx: Context, id: string): Promise<void> {
         const exists = await this.AssetExists(ctx, id);
@@ -123,7 +119,6 @@ export class AssetTransferContract extends Contract {
         return ctx.stub.deleteState(id);
     }
 
-    // AssetExists returns true when asset with given ID exists in world state.
     @Transaction(false)
     @Returns('boolean')
     public async AssetExists(ctx: Context, id: string): Promise<boolean> {
@@ -131,7 +126,6 @@ export class AssetTransferContract extends Contract {
         return assetJSON && assetJSON.length > 0;
     }
 
-    // TransferAsset updates the owner field of asset with given id in the world state, and returns the old owner.
     @Transaction()
     public async TransferAsset(ctx: Context, id: string, newOwner: string): Promise<string> {
         const assetString = await this.ReadAsset(ctx, id);
@@ -143,7 +137,6 @@ export class AssetTransferContract extends Contract {
         return oldOwner;
     }
 
-    // GetAllAssets returns all assets found in the world state.
     @Transaction(false)
     @Returns('string')
     public async GetAllAssets(ctx: Context): Promise<string> {
@@ -166,4 +159,35 @@ export class AssetTransferContract extends Contract {
         return JSON.stringify(allResults);
     }
 
+    @Transaction(false)
+    @Returns('string')
+    public async GetHistory(ctx: Context, id: string): Promise<string> {
+        const iterator = await ctx.stub.getHistoryForKey(id);
+        const allResults = [];
+        let result = await iterator.next();
+        while (!result.done) {
+            const mod = result.value;
+            const historyRecord = {
+                txId: mod.txId,
+                value: JSON.parse(mod.value.toString()),
+                timestamp: mod.timestamp.seconds,
+            };
+            allResults.push(historyRecord);
+            result = await iterator.next();
+        }
+        return JSON.stringify(allResults);
+    }
+
+    @Transaction(false)
+    @Returns('string')
+    public async GetByNonPrimaryKey(ctx: Context, queryString: string): Promise<string> {
+        const queryResults = await ctx.stub.getQueryResult(queryString);
+        const allResults = {};
+        let result = await queryResults.next();
+        while (!result.done) {
+            allResults[result.value.key] = JSON.parse(result.value.value.toString());
+            result = await queryResults.next();
+        }
+        return JSON.stringify(allResults);
+    }
 }

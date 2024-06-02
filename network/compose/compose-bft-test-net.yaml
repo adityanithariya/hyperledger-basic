@@ -1,4 +1,6 @@
-version: '3.7'
+networks:
+  test:
+    name: fabric_test
 
 volumes:
   orderer.example.com:
@@ -7,10 +9,6 @@ volumes:
   orderer4.example.com:
   peer0.org1.example.com:
   peer0.org2.example.com:
-
-networks:
-  test:
-    name: fabric_test
 
 services:
 

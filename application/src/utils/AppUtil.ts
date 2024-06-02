@@ -48,7 +48,7 @@ const buildWallet = async (walletPath: string): Promise<Wallet> => {
     if (walletPath) {
 
         // remove any pre-existing wallet from prior runs
-        fs.rmSync(walletPath, { recursive: true, force: true });
+        // fs.rmSync(walletPath, { recursive: true, force: true });
 
         wallet = await Wallets.newFileSystemWallet(walletPath);
         console.log(`Built a file system wallet at ${walletPath}`);

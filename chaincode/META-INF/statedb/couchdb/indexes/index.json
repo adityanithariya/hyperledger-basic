@@ -1,0 +1,12 @@
+{
+    "index": {
+        "fields": [
+            "Color",
+            "Owner",
+            "Size"
+        ]
+    },
+    "ddoc": "indexDoc",
+    "name": "index",
+    "type": "json"
+}
